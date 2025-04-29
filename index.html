@@ -15,7 +15,7 @@
       formData.append("user_id", user_id);
       const data = Object.fromEntries(formData.entries());
 
-      const res = await fetch(`https://your-backend-url/api/${type}`, {
+      const res = await fetch(`http://127.0.0.1:8080/api/${type}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

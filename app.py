@@ -45,7 +45,7 @@ def add_expense():
         INSERT INTO expenses (user_id, title, category, amount, important, date)
         VALUES (?, ?, ?, ?, ?, ?)
     ''', (
-        data['user_id'],
+        1,
         data['title'],
         data['category'],
         data['amount'],
@@ -67,7 +67,7 @@ def add_income():
         INSERT INTO incomes (user_id, title, amount, date)
         VALUES (?, ?, ?, ?)
     ''', (
-        data['user_id'],
+        1,
         data['title'],
         data['amount'],
         datetime.now().isoformat()
@@ -79,7 +79,7 @@ def add_income():
 
 @app.route('/api/report', methods=['GET'])
 def report():
-    user_id = request.args.get('user_id')
+    user_id = 1
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
 

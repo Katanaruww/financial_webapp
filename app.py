@@ -57,6 +57,7 @@ def add_expense():
 @app.route('/api/income', methods=['POST'])
 def add_income():
     data = request.json
+    print("INCOME:", data)
     conn = sqlite3.connect('finance.db')
     cur = conn.cursor()
     cur.execute('''

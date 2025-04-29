@@ -26,20 +26,51 @@
       const result = await res.json();
       alert(result.message);
     }
+
+    function toggleForm(type) {
+      document.getElementById('expense-form').classList.add('hidden');
+      document.getElementById('income-form').classList.add('hidden');
+      document.getElementById(`${type}-form`).classList.remove('hidden');
+    }
+
+    function showAdd() {
+      document.getElementById('main-menu').classList.add('hidden');
+      document.getElementById('add-section').classList.remove('hidden');
+    }
+
+    function backToMenu() {
+      document.getElementById('main-menu').classList.remove('hidden');
+      document.getElementById('add-section').classList.add('hidden');
+      document.getElementById('expense-form').classList.add('hidden');
+      document.getElementById('income-form').classList.add('hidden');
+    }
+
+    function showView() {
+      alert('📋 Просмотр записей появится позже');
+    }
+
+    function showStats() {
+      alert('📊 Статистика в разработке');
+    }
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4">
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6">
-    <h1 class="text-2xl font-bold text-center mb-4">Учёт трат и доходов</h1>
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
+    <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
+    <div class="flex flex-col gap-4">
+      <button onclick="showAdd()" class="bg-blue-500 text-white w-full py-2 rounded">➕ Добавить запись</button>
+      <button onclick="showView()" class="bg-green-500 text-white w-full py-2 rounded">📋 Просмотреть записи</button>
+      <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded">📊 Статистика</button>
+    </div>
+  </div>
 
-    <!-- Выбор формы -->
-    <div class="flex justify-center gap-4 mb-4">
-      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Добавить трату</button>
-      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Добавить доход</button>
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="add-section">
+    <div class="flex justify-between mb-4">
+      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Трата</button>
+      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Доход</button>
     </div>
 
-    <!-- Форма трат -->
     <form id="expense-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('expense');">
       <input name="title" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
       <select name="category" class="w-full border p-2 rounded mb-2">
@@ -54,20 +85,13 @@
       <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить трату</button>
     </form>
 
-    <!-- Форма доходов -->
     <form id="income-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('income');">
       <input name="title" placeholder="Источник дохода" class="w-full border p-2 rounded mb-2">
       <input name="amount" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-4">
       <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить доход</button>
     </form>
-  </div>
 
-  <script>
-    function toggleForm(type) {
-      document.getElementById('expense-form').classList.add('hidden');
-      document.getElementById('income-form').classList.add('hidden');
-      document.getElementById(`${type}-form`).classList.remove('hidden');
-    }
-  </script>
+    <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
+  </div>
 </body>
 </html>

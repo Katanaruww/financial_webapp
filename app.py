@@ -7,7 +7,8 @@ app = Flask(__name__)
 CORS(app)
 # Инициализация базы
 def init_db():
-    conn = sqlite3.connect('finance.db')
+    conn = sqlite3.connect('/data/finance.db')
+
     cur = conn.cursor()
     cur.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
@@ -37,7 +38,8 @@ init_db()
 @app.route('/api/expense', methods=['POST'])
 def add_expense():
     data = request.json
-    conn = sqlite3.connect('finance.db')
+    conn = sqlite3.connect('/data/finance.db')
+
     cur = conn.cursor()
     cur.execute('''
         INSERT INTO expenses (user_id, title, category, amount, important, date)
@@ -58,7 +60,8 @@ def add_expense():
 def add_income():
     data = request.json
     print("INCOME:", data)
-    conn = sqlite3.connect('finance.db')
+    conn = sqlite3.connect('/data/finance.db')
+
     cur = conn.cursor()
     cur.execute('''
         INSERT INTO incomes (user_id, title, amount, date)
@@ -80,7 +83,8 @@ def report():
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
 
-    conn = sqlite3.connect('finance.db')  # или './finance.db' если без Render-диска
+    conn = sqlite3.connect('/data/finance.db')
+  # или './finance.db' если без Render-диска
     cur = conn.cursor()
 
     cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = ?", (user_id,))

@@ -87,10 +87,10 @@ def report():
   # или './finance.db' если без Render-диска
     cur = conn.cursor()
 
-    cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = ?", (user_id,))
+    cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = 1")
     incomes = cur.fetchall()
 
-    cur.execute("SELECT title, category, amount, important, date FROM expenses WHERE user_id = ?", (user_id,))
+    cur.execute("SELECT title, category, amount, important, date FROM expenses WHERE user_id = 1"))
     expenses = cur.fetchall()
 
     conn.close()
@@ -99,6 +99,11 @@ def report():
         "incomes": incomes,
         "expenses": expenses
     })
+    print("📦 Получен запрос на отчёт")
+    print("Доходы:")
+    print(incomes)
+    print("Траты:")
+    print(expenses)
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

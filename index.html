@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Финансовый учёт</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+    let user_id = tg.initDataUnsafe?.user?.id;
+
+    async function sendFormData(type) {
+      const formData = new FormData(document.getElementById(`${type}-form`));
+      formData.append("user_id", user_id);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await fetch(`https://your-backend-url/api/${type}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.message);
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6">
+    <h1 class="text-2xl font-bold text-center mb-4">Учёт трат и доходов</h1>
+
+    <!-- Выбор формы -->
+    <div class="flex justify-center gap-4 mb-4">
+      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Добавить трату</button>
+      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Добавить доход</button>
+    </div>
+
+    <!-- Форма трат -->
+    <form id="expense-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('expense');">
+      <input name="title" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
+      <select name="category" class="w-full border p-2 rounded mb-2">
+        <option value="Продукты">Продукты</option>
+        <option value="Транспорт">Транспорт</option>
+        <option value="Развлечения">Развлечения</option>
+      </select>
+      <input name="amount" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
+      <label class="flex items-center mb-4">
+        <input type="checkbox" name="important" class="mr-2"> Важная трата
+      </label>
+      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить трату</button>
+    </form>
+
+    <!-- Форма доходов -->
+    <form id="income-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('income');">
+      <input name="title" placeholder="Источник дохода" class="w-full border p-2 rounded mb-2">
+      <input name="amount" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-4">
+      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить доход</button>
+    </form>
+  </div>
+
+  <script>
+    function toggleForm(type) {
+      document.getElementById('expense-form').classList.add('hidden');
+      document.getElementById('income-form').classList.add('hidden');
+      document.getElementById(`${type}-form`).classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

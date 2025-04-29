@@ -73,6 +73,28 @@ def add_income():
     conn.close()
     return jsonify({"message": "Доход сохранён"})
 
+
+@app.route('/api/report', methods=['GET'])
+def report():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({"error": "user_id required"}), 400
+
+    conn = sqlite3.connect('finance.db')  # или './finance.db' если без Render-диска
+    cur = conn.cursor()
+
+    cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = ?", (user_id,))
+    incomes = cur.fetchall()
+
+    cur.execute("SELECT title, category, amount, important, date FROM expenses WHERE user_id = ?", (user_id,))
+    expenses = cur.fetchall()
+
+    conn.close()
+
+    return jsonify({
+        "incomes": incomes,
+        "expenses": expenses
+    })
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

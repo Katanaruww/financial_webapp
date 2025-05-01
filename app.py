@@ -79,31 +79,44 @@ def add_income():
 
 @app.route('/api/report', methods=['GET'])
 def report():
-    user_id = 1
-    if not user_id:
-        return jsonify({"error": "user_id required"}), 400
-
+    user_id = 1  # фиксированный ID
     conn = sqlite3.connect('/data/finance.db')
-  # или './finance.db' если без Render-диска
     cur = conn.cursor()
 
-    cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = 1")
+    # Доходы
+    cur.execute("SELECT title, amount, date FROM incomes WHERE user_id = ?", (user_id,))
     incomes = cur.fetchall()
+    total_income = sum(row[1] for row in incomes)
 
-    cur.execute("SELECT title, category, amount, important, date FROM expenses WHERE user_id = 1"))
+    # Траты
+    cur.execute("SELECT title, category, amount, important, date FROM expenses WHERE user_id = ?", (user_id,))
     expenses = cur.fetchall()
+    total_expense = sum(row[2] for row in expenses)
+
+    # Последние 5 трат
+    cur.execute("SELECT title, amount FROM expenses WHERE user_id = ? ORDER BY date DESC LIMIT 5", (user_id,))
+    latest_expenses = cur.fetchall()
+
+    # Суммы по категориям
+    cur.execute("""
+        SELECT category, SUM(amount)
+        FROM expenses
+        WHERE user_id = ?
+        GROUP BY category
+    """, (user_id,))
+    category_totals = cur.fetchall()
 
     conn.close()
 
     return jsonify({
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "balance": total_income - total_expense,
+        "latest_expenses": latest_expenses,
+        "category_totals": category_totals,
         "incomes": incomes,
         "expenses": expenses
     })
-    print("📦 Получен запрос на отчёт")
-    print("Доходы:")
-    print(incomes)
-    print("Траты:")
-    print(expenses)
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

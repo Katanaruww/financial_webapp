@@ -21,6 +21,21 @@
 
       const result = await res.json();
       alert(result.message);
+      backToMenu();
+      loadLatest();
+    }
+
+    async function loadLatest() {
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+      const data = await res.json();
+      const latest = document.getElementById("latest-expenses");
+      latest.innerHTML = "";
+      data.latest_expenses.forEach(([title, amount]) => {
+        const div = document.createElement("div");
+        div.className = "text-sm text-gray-700";
+        div.textContent = `${title} — ${amount}₽`;
+        latest.appendChild(div);
+      });
     }
 
     async function loadView(type) {
@@ -37,13 +52,33 @@
 
       rows.forEach((row) => {
         const tr = document.createElement("tr");
-        row.forEach((val) => {
+        const formatted = type === 'income'
+          ? [row[0], `${row[1]}₽`, formatDate(row[2])]
+          : [row[0], row[1], `${row[2]}₽`, row[3] ? "⚠️" : "", formatDate(row[4])];
+
+        formatted.forEach((val) => {
           const td = document.createElement("td");
           td.className = "border px-2 py-1 text-sm";
           td.textContent = val;
           tr.appendChild(td);
         });
         table.appendChild(tr);
+      });
+    }
+
+    async function loadStats() {
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+      const data = await res.json();
+      document.getElementById("stat-income").textContent = `${data.total_income}₽`;
+      document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
+      document.getElementById("stat-balance").textContent = `${data.balance}₽`;
+
+      const categories = document.getElementById("stat-categories");
+      categories.innerHTML = "";
+      data.category_totals.forEach(([cat, sum]) => {
+        const li = document.createElement("li");
+        li.textContent = `${cat} — ${sum}₽`;
+        categories.appendChild(li);
       });
     }
 
@@ -64,29 +99,44 @@
     }
 
     function showStats() {
-      alert('📊 Статистика в разработке');
+      hideAll();
+      document.getElementById('stats-section').classList.remove('hidden');
+      loadStats();
     }
 
     function backToMenu() {
       hideAll();
       document.getElementById('main-menu').classList.remove('hidden');
+      loadLatest();
     }
 
     function hideAll() {
       document.getElementById('main-menu').classList.add('hidden');
       document.getElementById('add-section').classList.add('hidden');
       document.getElementById('view-section').classList.add('hidden');
+      document.getElementById('stats-section').classList.add('hidden');
     }
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString("ru-RU");
+    }
+
+    window.onload = loadLatest;
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4">
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 mb-4">
       <button onclick="showAdd()" class="bg-blue-500 text-white w-full py-2 rounded">➕ Добавить запись</button>
       <button onclick="showView()" class="bg-green-500 text-white w-full py-2 rounded">📋 Просмотреть записи</button>
       <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded">📊 Статистика</button>
+    </div>
+    <div class="bg-gray-100 rounded p-2">
+      <p class="text-sm font-semibold mb-1">Последние траты:</p>
+      <div id="latest-expenses" class="space-y-1"></div>
     </div>
   </div>
 
@@ -128,6 +178,20 @@
     <table class="w-full text-left border border-collapse">
       <tbody id="view-table"></tbody>
     </table>
+    <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
+  </div>
+
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="stats-section">
+    <h2 class="text-xl font-bold text-center mb-4">📊 Статистика</h2>
+    <div class="space-y-2 text-sm">
+      <div>💰 Доходы: <span id="stat-income"></span></div>
+      <div>💸 Расходы: <span id="stat-expense"></span></div>
+      <div>🟢 Баланс: <span id="stat-balance"></span></div>
+    </div>
+    <div class="mt-4">
+      <h3 class="text-sm font-semibold mb-1">📁 Категории:</h3>
+      <ul id="stat-categories" class="list-disc list-inside text-sm text-gray-700"></ul>
+    </div>
     <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
   </div>
 </body>

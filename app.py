@@ -141,6 +141,27 @@ def debug_data():
         "expenses": expenses,
         "incomes": incomes
     })
+
+@app.route('/api/edit_row', methods=['POST'])
+def edit_row():
+    data = request.json
+    table = data.get("table")
+    row_id = data.get("id")
+    fields = data.get("fields", {})
+
+    if table not in ["expenses", "incomes"] or not row_id or not fields:
+        return jsonify({"error": "Invalid input"}), 400
+
+    set_clause = ", ".join([f"{key} = ?" for key in fields.keys()])
+    values = list(fields.values()) + [row_id]
+
+    conn = sqlite3.connect("/data/finance.db")
+    cur = conn.cursor()
+    cur.execute(f"UPDATE {table} SET {set_clause} WHERE id = ?", values)
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Запись обновлена"})
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

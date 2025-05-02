@@ -35,6 +35,10 @@
     hideAll();
     document.getElementById("edit-section").classList.remove("hidden");
   }
+  function showMainMenu() {
+    hideAll();
+    document.getElementById("main-menu").classList.remove("hidden");
+  }
 
   async function showIncomePlan() {
   hideAll();
@@ -385,10 +389,13 @@
       <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-2 bg-gray-300 w-full py-2 rounded">← Назад</button>
     </form>
   </div>
+
+  
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="income-plan-section">
     <h2 class="text-xl font-bold text-center mb-4">📈 Подсчёт накоплений</h2>
     <div id="income-plan-list" class="space-y-2 text-sm text-gray-800"></div>
-      <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 w-full py-2 rounded">← Назад</button>
+      <button onclick="hideAll(); showMainMenu()" class="...">← Назад</button>
+
   </div>
 
 </body>

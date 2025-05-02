@@ -103,38 +103,47 @@
     const data = Object.fromEntries(formData.entries());
     data.user_id = user_id;
 
-    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-
-    const result = await res.json();
-    alert(result.message);
-    form.reset();
-    loadLatest();
-
-    // 💰 Распределение дохода
     if (type === "income") {
-      fetch("https://financial-webapp-bot.onrender.com/api/income_plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ income: Number(data.amount), user_id })
-      })
-      .then(res => res.json())
-      .then(res => {
-        const p = res.plan;
-        alert(
-          `💰 Распределение дохода:\n\n` +
-          `Обязательные расходы: ${p.essentials}₽\n` +
-          `Инвестиции: ${p.investments}₽\n` +
-          `Целевые накопления: ${p.goals}₽\n` +
-          `Подушка безопасности: ${p.safety}₽\n` +
-          `Развлечения: ${p.fun}₽`
-        );
-      });
-    }
-  }
+  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/income`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+  form.reset();
+  loadLatest();
+
+  const planRes = await fetch("https://financial-webapp-bot.onrender.com/api/income_plan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ income: Number(data.amount), user_id })
+  });
+  const planData = await planRes.json();
+  const p = planData.plan;
+
+  alert(
+    `✅ Доход сохранён\n\n` +
+    `💰 Распределение:\n` +
+    `Обязательные расходы: ${p.essentials}₽\n` +
+    `Инвестиции: ${p.investments}₽\n` +
+    `Целевые накопления: ${p.goals}₽\n` +
+    `Подушка безопасности: ${p.safety}₽\n` +
+    `Развлечения: ${p.fun}₽`
+  );
+
+} else {
+  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+  alert(result.message);
+  form.reset();
+  loadLatest();
+}
 
   async function loadView(type) {
     const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);

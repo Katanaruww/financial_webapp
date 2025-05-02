@@ -171,6 +171,21 @@ def edit_row():
     conn.close()
 
     return jsonify({"message": "Запись обновлена"})
+
+@app.route("/api/get_income_plan", methods=["GET"])
+def get_income_plan():
+    user_id = request.args.get("user_id", 1)
+    conn = sqlite3.connect("/data/finance.db")
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT income, essentials, investments, goals, safety, fun, date
+        FROM income_plan WHERE user_id = ? ORDER BY date DESC
+    """, (user_id,))
+    rows = cur.fetchall()
+    conn.close()
+
+    return jsonify({ "plans": rows })
+
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

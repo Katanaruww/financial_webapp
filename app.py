@@ -127,6 +127,20 @@ def clear_data():
     conn.commit()
     conn.close()
     return jsonify({"message": "База очищена"})
+
+@app.route('/api/debug', methods=['GET'])
+def debug_data():
+    conn = sqlite3.connect("/data/finance.db")
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM expenses")
+    expenses = cur.fetchall()
+    cur.execute("SELECT * FROM incomes")
+    incomes = cur.fetchall()
+    conn.close()
+    return jsonify({
+        "expenses": expenses,
+        "incomes": incomes
+    })
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

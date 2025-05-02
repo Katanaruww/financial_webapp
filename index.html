@@ -114,8 +114,7 @@ async function showIncomePlan() {
     list.appendChild(item);
   });
 }
-
-
+}
   async function loadLatest() {
     const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
     const data = await res.json();

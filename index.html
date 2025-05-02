@@ -36,11 +36,38 @@
     document.getElementById("edit-section").classList.remove("hidden");
   }
 
-  function showIncomePlan() {
-    hideAll();
-    alert("📈 Пока что здесь будет список накоплений. Скоро сделаю!");
-    // Здесь позже можно загрузить из /api/get_income_plan
+  async function showIncomePlan() {
+  hideAll();
+  document.getElementById("income-plan-section").classList.remove("hidden");
+
+  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/get_income_plan?user_id=${user_id}`);
+  const data = await res.json();
+
+  const list = document.getElementById("income-plan-list");
+  list.innerHTML = "";
+
+  if (data.plans.length === 0) {
+    list.innerHTML = "<p class='text-gray-500'>Нет записей распределения доходов</p>";
+    return;
   }
+
+  data.plans.forEach(([income, essentials, investments, goals, safety, fun, date]) => {
+    const item = document.createElement("div");
+    item.className = "border p-2 rounded bg-gray-50";
+    item.innerHTML = `
+      <p><strong>Доход:</strong> ${income}₽ (${new Date(date).toLocaleDateString("ru-RU")})</p>
+      <ul class="ml-4 list-disc">
+        <li>Обязательные расходы: ${essentials}₽</li>
+        <li>Инвестиции: ${investments}₽</li>
+        <li>Целевые накопления: ${goals}₽</li>
+        <li>Подушка безопасности: ${safety}₽</li>
+        <li>Развлечения: ${fun}₽</li>
+      </ul>
+    `;
+    list.appendChild(item);
+  });
+}
+
 
   async function loadLatest() {
     const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
@@ -204,6 +231,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("auth-screen").classList.remove("hidden");
   });
+  
 </script>
 
 
@@ -347,6 +375,11 @@
       <button type="submit" class="bg-yellow-500 text-white w-full py-2 rounded">💾 Сохранить изменения</button>
       <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-2 bg-gray-300 w-full py-2 rounded">← Назад</button>
     </form>
+  </div>
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="income-plan-section">
+    <h2 class="text-xl font-bold text-center mb-4">📈 Подсчёт накоплений</h2>
+    <div id="income-plan-list" class="space-y-2 text-sm text-gray-800"></div>
+      <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 w-full py-2 rounded">← Назад</button>
   </div>
 
 </body>

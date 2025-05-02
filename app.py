@@ -172,6 +172,33 @@ def edit_row():
 
     return jsonify({"message": "Запись обновлена"})
 
+
+@app.route("/api/income_plan", methods=["POST"])
+def income_plan():
+    data = request.json
+    income = int(data["income"])
+    user_id = int(data.get("user_id", 1))
+
+    plan = {
+        "essentials": round(income * 0.4),
+        "investments": round(income * 0.35),
+        "goals": round(income * 0.1),
+        "safety": round(income * 0.1),
+        "fun": round(income * 0.05)
+    }
+
+    conn = sqlite3.connect("/data/finance.db")
+    cur = conn.cursor()
+    cur.execute('''
+        INSERT INTO income_plan (user_id, income, essentials, investments, goals, safety, fun, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))
+    ''', (user_id, income, plan["essentials"], plan["investments"], plan["goals"], plan["safety"], plan["fun"]))
+    conn.commit()
+    conn.close()
+
+    return jsonify({ "message": "План добавлен", "plan": plan })
+
+
 @app.route("/api/get_income_plan", methods=["GET"])
 def get_income_plan():
     user_id = request.args.get("user_id", 1)

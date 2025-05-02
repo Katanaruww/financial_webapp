@@ -39,6 +39,7 @@
     function showView() {
       hideAll();
       document.getElementById("view-section").classList.remove("hidden");
+      loadView('expense');
     }
 
     function showStats() {
@@ -47,16 +48,40 @@
       loadStats();
     }
 
-    function hideAll() {
-      document.getElementById("main-menu").classList.add("hidden");
-      document.getElementById("add-section").classList.add("hidden");
-      document.getElementById("view-section").classList.add("hidden");
-      document.getElementById("stats-section").classList.add("hidden");
+    function showEdit() {
+      hideAll();
+      document.getElementById("edit-section").classList.remove("hidden");
     }
 
-    function formatDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("ru-RU");
+    function hideAll() {
+      ["main-menu", "add-section", "view-section", "stats-section", "edit-section"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+    }
+
+    async function sendFormData(type) {
+      const form = document.getElementById(`${type}-form`);
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.user_id = user_id;
+
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      alert(result.message);
+      form.reset();
+      loadLatest();
+    }
+
+    function toggleForm(type) {
+      ["expense-form", "income-form"].forEach(id => {
+        document.getElementById(id).classList.add("hidden");
+      });
+      document.getElementById(`${type}-form`).classList.remove("hidden");
     }
 
     async function loadView(type) {
@@ -66,18 +91,9 @@
       table.innerHTML = "";
       const rows = type === "income" ? data.incomes : data.expenses;
 
-      if (rows.length === 0) {
-        table.innerHTML = '<p class="text-center text-gray-500">Нет записей</p>';
-        return;
-      }
-
-      rows.forEach((row) => {
+      rows.forEach(row => {
         const tr = document.createElement("tr");
-        const formatted = type === 'income'
-          ? [row[0], `${row[1]}₽`, formatDate(row[2])]
-          : [row[0], row[1], `${row[2]}₽`, row[3] ? "⚠️" : "", formatDate(row[4])];
-
-        formatted.forEach((val) => {
+        row.forEach(val => {
           const td = document.createElement("td");
           td.className = "border px-2 py-1 text-sm";
           td.textContent = val;
@@ -90,42 +106,25 @@
     async function loadStats() {
       const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
       const data = await res.json();
-      document.getElementById("stat-income").textContent = `${data.total_income}₽`;
-      document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
-      document.getElementById("stat-balance").textContent = `${data.balance}₽`;
-
-      const categories = document.getElementById("stat-categories");
-      categories.innerHTML = "";
-      data.category_totals.forEach(([cat, sum]) => {
-        const li = document.createElement("li");
-        li.textContent = `${cat} — ${sum}₽`;
-        categories.appendChild(li);
-      });
+      document.getElementById("stat-income").textContent = data.total_income;
+      document.getElementById("stat-expense").textContent = data.total_expense;
+      document.getElementById("stat-balance").textContent = data.balance;
     }
 
-    function toggleForm(type) {
-      document.getElementById("expense-form").classList.add("hidden");
-      document.getElementById("income-form").classList.add("hidden");
-      document.getElementById(`${type}-form`).classList.remove("hidden");
-    }
+    async function sendEditForm() {
+      const table = document.getElementById("edit-table").value;
+      const id = document.getElementById("edit-id").value;
+      const field = document.getElementById("edit-field").value;
+      const value = document.getElementById("edit-value").value;
 
-    async function sendFormData(type) {
-      const form = document.getElementById(`${type}-form`);
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      data.user_id = user_id;
-
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ table, id, fields: { [field]: value } })
       });
 
       const result = await res.json();
       alert(result.message);
-      form.reset();
     }
 
     window.onload = loadLatest;
@@ -136,22 +135,39 @@
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
     <div class="flex items-center gap-2 mb-2">
-      <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
-      <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
-    </div>
-    <button onclick="showView()" class="bg-green-500 text-white w-full py-2 rounded mb-2">📋 Просмотреть записи</button>
-    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-4">📊 Статистика</button>
+  <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
+  <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
+</div>
+<div class="flex items-center gap-2 mb-2">
+  <button onclick="showEdit()" class="bg-yellow-500 text-white px-3 py-2 rounded">✏️</button>
+  <button onclick="showView()" class="flex-grow bg-green-500 text-white py-2 rounded">📋 Просмотреть записи</button>
+</div>
+    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-2">📊 Статистика</button>
+    
     <div class="bg-gray-100 rounded p-2">
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
       <div id="latest-expenses" class="space-y-1"></div>
     </div>
   </div>
 
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="edit-section">
+    <h2 class="text-xl font-bold text-center mb-4">Редактировать запись</h2>
+    <select id="edit-table" class="w-full border p-2 rounded mb-2">
+      <option value="expenses">Траты</option>
+      <option value="incomes">Доходы</option>
+    </select>
+    <input id="edit-id" type="number" placeholder="ID записи" class="w-full border p-2 rounded mb-2">
+    <input id="edit-field" type="text" placeholder="Поле (например, title)" class="w-full border p-2 rounded mb-2">
+    <input id="edit-value" type="text" placeholder="Новое значение" class="w-full border p-2 rounded mb-2">
+    <button onclick="sendEditForm()" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить изменения</button>
+    <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
+  </div>
+
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="add-section">
     <h2 class="text-xl font-bold text-center mb-4">Добавить запись</h2>
-    <div class="flex justify-between gap-2 mb-4">
-      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg w-1/2">Трата</button>
-      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg w-1/2">Доход</button>
+    <div class="flex gap-2 mb-4">
+      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded w-full">Трата</button>
+      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded w-full">Доход</button>
     </div>
     <form id="expense-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('expense');">
       <input name="title" placeholder="Наименование" class="w-full border p-2 rounded mb-2">

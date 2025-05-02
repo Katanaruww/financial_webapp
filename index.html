@@ -58,26 +58,23 @@ async function showIncomePlan() {
     return;
   }
 
-  // Создание таблицы
   const table = document.createElement("table");
   table.className = "w-full text-left border border-collapse";
 
-  // Заголовок таблицы
   const thead = document.createElement("thead");
   thead.innerHTML = `
     <tr>
       <th class="border px-2 py-1 text-sm">Дата</th>
       <th class="border px-2 py-1 text-sm">Доход</th>
-      <th class="border px-2 py-1 text-sm">Обязательные расходы</th>
+      <th class="border px-2 py-1 text-sm">Обязательные</th>
       <th class="border px-2 py-1 text-sm">Инвестиции</th>
-      <th class="border px-2 py-1 text-sm">Целевые накопления</th>
-      <th class="border px-2 py-1 text-sm">Подушка безопасности</th>
+      <th class="border px-2 py-1 text-sm">Накопления</th>
+      <th class="border px-2 py-1 text-sm">Подушка</th>
       <th class="border px-2 py-1 text-sm">Развлечения</th>
     </tr>
   `;
   table.appendChild(thead);
 
-  // Тело таблицы
   const tbody = document.createElement("tbody");
   data.plans.forEach(([income, essentials, investments, goals, safety, fun, date]) => {
     const tr = document.createElement("tr");
@@ -93,28 +90,9 @@ async function showIncomePlan() {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-
   list.appendChild(table);
 }
 
-
-  data.plans.forEach(([income, essentials, investments, goals, safety, fun, date]) => {
-    const item = document.createElement("div");
-    item.className = "border p-2 rounded bg-gray-50";
-    item.innerHTML = `
-      <p><strong>Доход:</strong> ${income}₽ (${new Date(date).toLocaleDateString("ru-RU")})</p>
-      <ul class="ml-4 list-disc">
-        <li>Обязательные расходы: ${essentials}₽</li>
-        <li>Инвестиции: ${investments}₽</li>
-        <li>Целевые накопления: ${goals}₽</li>
-        <li>Подушка безопасности: ${safety}₽</li>
-        <li>Развлечения: ${fun}₽</li>
-      </ul>
-    `;
-    list.appendChild(item);
-  });
-}
-}
   async function loadLatest() {
     const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
     const data = await res.json();

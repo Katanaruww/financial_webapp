@@ -91,10 +91,27 @@
   table.innerHTML = "";
   const rows = type === "income" ? data.incomes : data.expenses;
 
-  if (rows.length === 0) {
+  if (!rows || rows.length === 0) {
     table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
     return;
   }
+
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    row.forEach((val, idx) => {
+      const td = document.createElement("td");
+      td.className = "border px-2 py-1 text-sm";
+      if (idx === row.length - 1 && typeof val === 'string') {
+        const d = new Date(val);
+        td.textContent = d.toLocaleDateString("ru-RU");
+      } else {
+        td.textContent = val === 0 ? "" : val;
+      }
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+}
 
   rows.forEach(row => {
     const tr = document.createElement("tr");
@@ -111,7 +128,7 @@
     });
     table.appendChild(tr);
   });
-};
+}
     table.appendChild(tr);
   });
 });
@@ -120,12 +137,20 @@
     }
 
     async function loadStats() {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      document.getElementById("stat-income").textContent = data.total_income;
-      document.getElementById("stat-expense").textContent = data.total_expense;
-      document.getElementById("stat-balance").textContent = data.balance;
-    }
+  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+  const data = await res.json();
+  document.getElementById("stat-income").textContent = `${data.total_income}₽`;
+  document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
+  document.getElementById("stat-balance").textContent = `${data.balance}₽`;
+
+  const catList = document.getElementById("stat-categories");
+  catList.innerHTML = "";
+  data.category_totals.forEach(([category, total]) => {
+    const li = document.createElement("li");
+    li.textContent = `${category} — ${total}₽`;
+    catList.appendChild(li);
+  });
+}
 
     async function sendEditForm() {
       const table = document.getElementById("edit-table").value;

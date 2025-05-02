@@ -7,21 +7,14 @@
   <script>
     let user_id = 1;
 
-    async function sendFormData(type) {
-      const formData = new FormData(document.getElementById(`${type}-form`));
-      const data = Object.fromEntries(formData.entries());
-
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
+    async function clearAllData() {
+      const confirmed = confirm("Ты точно хочешь удалить все записи?");
+      if (!confirmed) return;
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
+        method: "POST"
       });
-
       const result = await res.json();
       alert(result.message);
-      backToMenu();
       loadLatest();
     }
 
@@ -38,101 +31,6 @@
       });
     }
 
-    async function loadView(type) {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      const table = document.getElementById("view-table");
-      table.innerHTML = "";
-      const rows = type === "income" ? data.incomes : data.expenses;
-
-      if (rows.length === 0) {
-        table.innerHTML = '<p class="text-center text-gray-500">Нет записей</p>';
-        return;
-      }
-
-      rows.forEach((row) => {
-        const tr = document.createElement("tr");
-        const formatted = type === 'income'
-          ? [row[0], `${row[1]}₽`, formatDate(row[2])]
-          : [row[0], row[1], `${row[2]}₽`, row[3] ? "⚠️" : "", formatDate(row[4])];
-
-        formatted.forEach((val) => {
-          const td = document.createElement("td");
-          td.className = "border px-2 py-1 text-sm";
-          td.textContent = val;
-          tr.appendChild(td);
-        });
-        table.appendChild(tr);
-      });
-    }
-
-    async function loadStats() {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      document.getElementById("stat-income").textContent = `${data.total_income}₽`;
-      document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
-      document.getElementById("stat-balance").textContent = `${data.balance}₽`;
-
-      const categories = document.getElementById("stat-categories");
-      categories.innerHTML = "";
-      data.category_totals.forEach(([cat, sum]) => {
-        const li = document.createElement("li");
-        li.textContent = `${cat} — ${sum}₽`;
-        categories.appendChild(li);
-      });
-    }
-
-    async function clearAllData() {
-      const confirmed = confirm("Ты точно хочешь удалить все записи?");
-      if (!confirmed) return;
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
-        method: "POST"
-      });
-      const result = await res.json();
-      alert(result.message);
-      loadLatest();
-    }
-
-    function toggleForm(type) {
-      document.getElementById('expense-form').classList.add('hidden');
-      document.getElementById('income-form').classList.add('hidden');
-      document.getElementById(`${type}-form`).classList.remove('hidden');
-    }
-
-    function showAdd() {
-      hideAll();
-      document.getElementById('add-section').classList.remove('hidden');
-    }
-
-    function showView() {
-      hideAll();
-      document.getElementById('view-section').classList.remove('hidden');
-    }
-
-    function showStats() {
-      hideAll();
-      document.getElementById('stats-section').classList.remove('hidden');
-      loadStats();
-    }
-
-    function backToMenu() {
-      hideAll();
-      document.getElementById('main-menu').classList.remove('hidden');
-      loadLatest();
-    }
-
-    function hideAll() {
-      document.getElementById('main-menu').classList.add('hidden');
-      document.getElementById('add-section').classList.add('hidden');
-      document.getElementById('view-section').classList.add('hidden');
-      document.getElementById('stats-section').classList.add('hidden');
-    }
-
-    function formatDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleDateString("ru-RU");
-    }
-
     window.onload = loadLatest;
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -140,21 +38,23 @@
 <body class="bg-gray-100 p-4">
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
-    <div class="flex items-center justify-between gap-2 mb-4">
-      <div class="flex-grow">
-        <button onclick="showAdd()" class="bg-blue-500 text-white w-full py-2 rounded">➕ Добавить запись</button>
-      </div>
-      <div class="flex flex-col gap-1">
-        <button onclick="showStats()" class="bg-gray-400 text-white px-3 py-2 rounded text-sm">📊</button>
-        <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded text-sm">🗑</button>
-      </div>
+
+    <!-- Первая строка: добавить + мусорка -->
+    <div class="flex items-center gap-2 mb-2">
+      <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
+      <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
     </div>
+
+    <!-- Вторая строка: просмотр -->
+    <button onclick="showView()" class="bg-green-500 text-white w-full py-2 rounded mb-2">📋 Просмотреть записи</button>
+
+    <!-- Третья строка: статистика -->
+    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-4">📊 Статистика</button>
+
     <div class="bg-gray-100 rounded p-2">
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
       <div id="latest-expenses" class="space-y-1"></div>
     </div>
   </div>
-
-  <!-- Остальной код без изменений -->
 </body>
 </html>

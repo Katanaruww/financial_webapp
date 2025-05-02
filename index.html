@@ -31,6 +31,28 @@
       });
     }
 
+    function showAdd() {
+      hideAll();
+      document.getElementById("add-section").classList.remove("hidden");
+    }
+
+    function showView() {
+      hideAll();
+      document.getElementById("view-section").classList.remove("hidden");
+    }
+
+    function showStats() {
+      hideAll();
+      document.getElementById("stats-section").classList.remove("hidden");
+    }
+
+    function hideAll() {
+      document.getElementById("main-menu").classList.add("hidden");
+      document.getElementById("add-section").classList.add("hidden");
+      document.getElementById("view-section").classList.add("hidden");
+      document.getElementById("stats-section").classList.add("hidden");
+    }
+
     window.onload = loadLatest;
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -55,6 +77,3 @@
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
       <div id="latest-expenses" class="space-y-1"></div>
     </div>
-  </div>
-</body>
-</html>

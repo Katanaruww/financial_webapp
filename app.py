@@ -187,5 +187,25 @@ def get_income_plan():
     return jsonify({ "plans": rows })
 
 if __name__ == '__main__':
+    def init_income_plan_table():
+    conn = sqlite3.connect("/data/finance.db")
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS income_plan (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            income INTEGER,
+            essentials INTEGER,
+            investments INTEGER,
+            goals INTEGER,
+            safety INTEGER,
+            fun INTEGER,
+            date TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+    init_income_plan_table()
     app.run(debug=True, port=8080)
 

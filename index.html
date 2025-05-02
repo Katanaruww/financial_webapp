@@ -1,21 +1,36 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Финансовый учёт</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     let user_id = 1;
 
-    async function clearAllData() {
-      const confirmed = confirm("Ты точно хочешь удалить все записи?");
-      if (!confirmed) return;
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
-        method: "POST"
-      });
-      const result = await res.json();
-      alert(result.message);
-      loadLatest();
+    function hideAll() {
+      document.querySelectorAll("#main-menu, #add-section, #view-section, #stats-section, #edit-section").forEach(el => el.classList.add("hidden"));
+    }
+
+    function showAdd() {
+      hideAll();
+      document.getElementById("add-section").classList.remove("hidden");
+    }
+
+    function showView() {
+      hideAll();
+      document.getElementById("view-section").classList.remove("hidden");
+    }
+
+    function showStats() {
+      hideAll();
+      document.getElementById("stats-section").classList.remove("hidden");
+      loadStats();
+    }
+
+    function showEdit() {
+      hideAll();
+      document.getElementById("edit-section").classList.remove("hidden");
     }
 
     async function loadLatest() {
@@ -31,32 +46,21 @@
       });
     }
 
-    function showAdd() {
-      hideAll();
-      document.getElementById("add-section").classList.remove("hidden");
-    }
-
-    function showView() {
-      hideAll();
-      document.getElementById("view-section").classList.remove("hidden");
-      loadView('expense');
-    }
-
-    function showStats() {
-      hideAll();
-      document.getElementById("stats-section").classList.remove("hidden");
-      loadStats();
-    }
-
-    function showEdit() {
-      hideAll();
-      document.getElementById("edit-section").classList.remove("hidden");
-    }
-
-    function hideAll() {
-      ["main-menu", "add-section", "view-section", "stats-section", "edit-section"].forEach(id => {
-        document.getElementById(id).classList.add("hidden");
+    async function clearAllData() {
+      const confirmed = confirm("Ты точно хочешь удалить все записи?");
+      if (!confirmed) return;
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
+        method: "POST"
       });
+      const result = await res.json();
+      alert(result.message);
+      loadLatest();
+    }
+
+    function toggleForm(type) {
+      document.getElementById("expense-form").classList.add("hidden");
+      document.getElementById("income-form").classList.add("hidden");
+      document.getElementById(`${type}-form`).classList.remove("hidden");
     }
 
     async function sendFormData(type) {
@@ -67,7 +71,9 @@
 
       const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify(data)
       });
 
@@ -77,236 +83,113 @@
       loadLatest();
     }
 
-    function toggleForm(type) {
-      ["expense-form", "income-form"].forEach(id => {
-        document.getElementById(id).classList.add("hidden");
-      });
-      document.getElementById(`${type}-form`).classList.remove("hidden");
-    }
-
     async function loadView(type) {
-  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-  const data = await res.json();
-  const table = document.getElementById("view-table");
-  table.innerHTML = "";
-  const rows = type === "income" ? data.incomes : data.expenses;
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+      const data = await res.json();
+      const table = document.getElementById("view-table");
+      table.innerHTML = "";
+      const rows = type === "income" ? data.incomes : data.expenses;
 
-  if (!rows || rows.length === 0) {
-    table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
-    return;
-  }
-
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.forEach((val, idx) => {
-      const td = document.createElement("td");
-      td.className = "border px-2 py-1 text-sm";
-      if (idx === row.length - 1 && typeof val === 'string') {
-        const d = new Date(val);
-        td.textContent = d.toLocaleDateString("ru-RU");
-      } else {
-        td.textContent = val === 0 ? "" : val;
+      if (rows.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
+        return;
       }
-      tr.appendChild(td);
-    });
-    table.appendChild(tr);
-  });
-}
 
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.forEach((val, idx) => {
-      const td = document.createElement("td");
-      td.className = "border px-2 py-1 text-sm";
-      if (idx === row.length - 1 && typeof val === 'string') {
-        const d = new Date(val);
-        td.textContent = d.toLocaleDateString("ru-RU");
-      } else {
-        td.textContent = val === 0 ? "" : val;
-      }
-      tr.appendChild(td);
-    });
-    
-  });
-}
-
-  rows.forEach(row => {
-    const tr = document.createElement("tr");
-    row.forEach((val, idx) => {
-      const td = document.createElement("td");
-      td.className = "border px-2 py-1 text-sm";
-      if (idx === row.length - 1) {
-        const d = new Date(val);
-        td.textContent = d.toLocaleDateString("ru-RU");
-      } else {
-        td.textContent = val === 0 ? "" : val;
-      }
-      tr.appendChild(td);
-    });
-    table.appendChild(tr);
-  });
-}
-    table.appendChild(tr);
-  });
-});
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+        row.forEach((val, idx) => {
+          const td = document.createElement("td");
+          td.className = "border px-2 py-1 text-sm";
+          if (idx === row.length - 1) {
+            const d = new Date(val);
+            td.textContent = d.toLocaleDateString("ru-RU");
+          } else {
+            td.textContent = val === 0 ? "" : val;
+          }
+          tr.appendChild(td);
+        });
         table.appendChild(tr);
       });
     }
 
     async function loadStats() {
-  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-  const data = await res.json();
-  document.getElementById("stat-income").textContent = `${data.total_income}₽`;
-  document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
-  document.getElementById("stat-balance").textContent = `${data.balance}₽`;
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+      const data = await res.json();
+      document.getElementById("stat-income").textContent = `${data.total_income}₽`;
+      document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
+      document.getElementById("stat-balance").textContent = `${data.balance}₽`;
 
-  const catList = document.getElementById("stat-categories");
-  catList.innerHTML = "";
-  data.category_totals.forEach(([category, total]) => {
-    const li = document.createElement("li");
-    li.textContent = `${category} — ${total}₽`;
-    catList.appendChild(li);
-  });
-}
-
-    async function sendEditForm() {
-      const table = document.getElementById("edit-table").value;
-      const id = document.getElementById("edit-id").value;
-      const field = document.getElementById("edit-field").value;
-      const value = document.getElementById("edit-value").value;
-
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ table, id, fields: { [field]: value } })
+      const categories = document.getElementById("stat-categories");
+      categories.innerHTML = "";
+      data.category_totals.forEach(([cat, sum]) => {
+        const li = document.createElement("li");
+        li.textContent = `${cat} — ${sum}₽`;
+        categories.appendChild(li);
       });
-
-      const result = await res.json();
-      alert(result.message);
     }
 
-    window.addEventListener("DOMContentLoaded", () => {
-  loadLatest();
-});
+    function sendEditForm() {
+      const table = document.getElementById("edit-type").value;
+      const id = document.getElementById("edit-id").value;
+      const title = document.getElementById("edit-title").value.trim();
+      const category = document.getElementById("edit-category").value;
+      const amount = document.getElementById("edit-amount").value;
+      const important = document.getElementById("edit-important").value;
+
+      const fields = {};
+      if (title) fields.title = title;
+      if (amount) fields.amount = Number(amount);
+      if (category) fields.category = category;
+      if (important !== "") fields.important = important === "1";
+
+      if (Object.keys(fields).length === 0) {
+        alert("Укажи хотя бы одно поле для изменения");
+        return;
+      }
+
+      fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ table, id, fields })
+      })
+      .then(res => res.json())
+      .then(data => alert(data.message || "Готово!"))
+      .catch(() => alert("Ошибка при отправке"));
+    }
+
+    document.addEventListener("DOMContentLoaded", loadLatest);
   </script>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4">
+
+  <!-- Main Menu -->
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
+
     <div class="flex items-center gap-2 mb-2">
-  <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
-  <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
-</div>
-<div class="flex items-center gap-2 mb-2">
-  <button onclick="showEdit()" class="bg-yellow-500 text-white px-3 py-2 rounded">✏️</button>
-  <button onclick="showView()" class="flex-grow bg-green-500 text-white py-2 rounded">📋 Просмотреть записи</button>
-</div>
-    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-2">📊 Статистика</button>
-    
+      <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
+      <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
+    </div>
+
+    <div class="flex items-center gap-2 mb-2">
+      <button onclick="showEdit()" class="bg-yellow-500 text-white px-3 py-2 rounded">✏️</button>
+      <button onclick="showView()" class="flex-grow bg-green-500 text-white py-2 rounded">📋 Просмотреть записи</button>
+    </div>
+
+    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-4">📊 Статистика</button>
+
     <div class="bg-gray-100 rounded p-2">
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
       <div id="latest-expenses" class="space-y-1"></div>
     </div>
   </div>
 
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="edit-section">
-  <h2 class="text-xl font-bold text-center mb-4">Редактировать запись</h2>
-  <div id="edit-form-container" class="space-y-4">
-    <form onsubmit="event.preventDefault(); sendEditFlexible();">
-      <label class="block text-sm font-semibold">Тип записи:</label>
-      <select id="edit-type" class="w-full border p-2 rounded mb-2">
-        <option value="expenses">Трата</option>
-        <option value="incomes">Доход</option>
-      </select>
-
-      <input id="edit-id-flex" type="number" placeholder="ID записи" class="w-full border p-2 rounded mb-2">
-
-      <div id="edit-expense-fields">
-        <input id="edit-title-exp" type="text" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
-        <select id="edit-category-exp" class="w-full border p-2 rounded mb-2">
-          <option value="">-- Категория --</option>
-          <option value="Дом">Дом</option>
-          <option value="Долги">Долги</option>
-          <option value="Транспорт">Транспорт</option>
-          <option value="Налоги">Налоги</option>
-          <option value="Благотворительность">Благотворительность</option>
-          <option value="Обучение">Обучение</option>
-        </select>
-        <input id="edit-amount-exp" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
-        <label class="flex items-center">
-          <input id="edit-important-exp" type="checkbox" class="mr-2"> Важная трата
-        </label>
-      </div>
-
-      <div id="edit-income-fields">
-        <input id="edit-title-inc" type="text" placeholder="Источник дохода" class="w-full border p-2 rounded mb-2">
-        <input id="edit-amount-inc" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
-      </div>
-
-      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить изменения</button>
-    </form>
-  </div>
-  <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
-</div>
-
-<script>
-  function sendEditFlexible() {
-    const type = document.getElementById("edit-type").value;
-    const id = document.getElementById("edit-id-flex").value;
-    const fields = {};
-
-    if (type === "expenses") {
-      const title = document.getElementById("edit-title-exp").value;
-      const category = document.getElementById("edit-category-exp").value;
-      const amount = document.getElementById("edit-amount-exp").value;
-      const important = document.getElementById("edit-important-exp").checked;
-
-      if (title) fields.title = title;
-      if (category) fields.category = category;
-      if (amount) fields.amount = amount;
-      if (document.getElementById("edit-important-exp").indeterminate === false) {
-        fields.important = important;
-      }
-    } else {
-      const title = document.getElementById("edit-title-inc").value;
-      const amount = document.getElementById("edit-amount-inc").value;
-      if (title) fields.title = title;
-      if (amount) fields.amount = amount;
-    }
-
-    if (!id || Object.keys(fields).length === 0) {
-      alert("Укажи ID и хотя бы одно поле для изменения");
-      return;
-    }
-
-    fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ table: type, id: id, fields })
-    })
-      .then(res => res.json())
-      .then(data => alert(data.message))
-      .catch(err => alert("Ошибка: " + err));
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const toggleEditUI = () => {
-      const type = document.getElementById("edit-type").value;
-      document.getElementById("edit-expense-fields").style.display = type === "expenses" ? "block" : "none";
-      document.getElementById("edit-income-fields").style.display = type === "incomes" ? "block" : "none";
-    };
-    document.getElementById("edit-type").addEventListener("change", toggleEditUI);
-    toggleEditUI();
-  });
-</script>
-  </div>
-
+  <!-- Add Section -->
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="add-section">
     <h2 class="text-xl font-bold text-center mb-4">Добавить запись</h2>
-    <div class="flex gap-2 mb-4">
-      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded w-full">Трата</button>
-      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded w-full">Доход</button>
+    <div class="flex justify-between gap-2 mb-4">
+      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg w-1/2">Трата</button>
+      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg w-1/2">Доход</button>
     </div>
     <form id="expense-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('expense');">
       <input name="title" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
@@ -332,7 +215,8 @@
     <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
   </div>
 
-  <div class="w-full max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="view-section">
+  <!-- View Section -->
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="view-section">
     <h2 class="text-xl font-bold text-center mb-4">Просмотр записей</h2>
     <div class="flex justify-between mb-4">
       <button onclick="loadView('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Траты</button>
@@ -344,6 +228,7 @@
     <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
   </div>
 
+  <!-- Stats Section -->
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="stats-section">
     <h2 class="text-xl font-bold text-center mb-4">📊 Статистика</h2>
     <div class="space-y-2 text-sm">
@@ -357,5 +242,54 @@
     </div>
     <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
   </div>
+
+  <!-- Edit Section -->
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="edit-section">
+    <h2 class="text-xl font-bold text-center mb-4">✏️ Редактировать запись</h2>
+    <form onsubmit="event.preventDefault(); sendEditForm();" class="space-y-2 text-sm">
+      <div>
+        <label>Тип записи:</label>
+        <select id="edit-type" class="w-full border p-2 rounded">
+          <option value="expenses">Трата</option>
+          <option value="incomes">Доход</option>
+        </select>
+      </div>
+      <div>
+        <label>ID записи:</label>
+        <input type="number" id="edit-id" class="w-full border p-2 rounded" required>
+      </div>
+      <div>
+        <label>Наименование:</label>
+        <input type="text" id="edit-title" class="w-full border p-2 rounded" placeholder="(оставь пустым, чтобы не менять)">
+      </div>
+      <div>
+        <label>Категория:</label>
+        <select id="edit-category" class="w-full border p-2 rounded">
+          <option value="">(не менять)</option>
+          <option value="Дом">Дом</option>
+          <option value="Долги">Долги</option>
+          <option value="Транспорт">Транспорт</option>
+          <option value="Налоги">Налоги</option>
+          <option value="Благотворительность">Благотворительность</option>
+          <option value="Обучение">Обучение</option>
+        </select>
+      </div>
+      <div>
+        <label>Сумма:</label>
+        <input type="number" id="edit-amount" class="w-full border p-2 rounded" placeholder="(не менять)">
+      </div>
+      <div>
+        <label>Важная трата:</label>
+        <select id="edit-important" class="w-full border p-2 rounded">
+          <option value="">(не менять)</option>
+          <option value="1">Да</option>
+          <option value="0">Нет</option>
+        </select>
+      </div>
+      <button type="submit" class="bg-yellow-500 text-white w-full py-2 rounded">💾 Сохранить изменения</button>
+      <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-2 bg-gray-300 w-full py-2 rounded">← Назад</button>
+    </form>
+  </div>
+
 </body>
 </html>

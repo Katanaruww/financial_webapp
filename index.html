@@ -96,7 +96,21 @@
     return;
   }
 
-  
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    row.forEach((val, idx) => {
+      const td = document.createElement("td");
+      td.className = "border px-2 py-1 text-sm";
+      if (idx === row.length - 1 && typeof val === 'string') {
+        const d = new Date(val);
+        td.textContent = d.toLocaleDateString("ru-RU");
+      } else {
+        td.textContent = val === 0 ? "" : val;
+      }
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
 }
 
   rows.forEach(row => {

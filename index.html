@@ -63,7 +63,7 @@ async function showIncomePlan() {
 
   const thead = document.createElement("thead");
   thead.innerHTML = `
-    <tr>
+    <tr class="bg-gray-100 font-bold">
       <th class="border px-2 py-1 text-sm">Дата</th>
       <th class="border px-2 py-1 text-sm">Доход</th>
       <th class="border px-2 py-1 text-sm">Обязательные</th>
@@ -76,7 +76,19 @@ async function showIncomePlan() {
   table.appendChild(thead);
 
   const tbody = document.createElement("tbody");
+
+  let total = {
+    income: 0, essentials: 0, investments: 0, goals: 0, safety: 0, fun: 0
+  };
+
   data.plans.forEach(([income, essentials, investments, goals, safety, fun, date]) => {
+    total.income += income;
+    total.essentials += essentials;
+    total.investments += investments;
+    total.goals += goals;
+    total.safety += safety;
+    total.fun += fun;
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td class="border px-2 py-1 text-sm">${new Date(date).toLocaleDateString("ru-RU")}</td>
@@ -89,9 +101,26 @@ async function showIncomePlan() {
     `;
     tbody.appendChild(tr);
   });
+
   table.appendChild(tbody);
+
+  const tfoot = document.createElement("tfoot");
+  tfoot.innerHTML = `
+    <tr class="bg-gray-200 font-semibold">
+      <td class="border px-2 py-1 text-sm">Итого</td>
+      <td class="border px-2 py-1 text-sm">${total.income}₽</td>
+      <td class="border px-2 py-1 text-sm">${total.essentials}₽</td>
+      <td class="border px-2 py-1 text-sm">${total.investments}₽</td>
+      <td class="border px-2 py-1 text-sm">${total.goals}₽</td>
+      <td class="border px-2 py-1 text-sm">${total.safety}₽</td>
+      <td class="border px-2 py-1 text-sm">${total.fun}₽</td>
+    </tr>
+  `;
+  table.appendChild(tfoot);
+
   list.appendChild(table);
 }
+
 
   async function loadLatest() {
     const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
@@ -411,11 +440,11 @@ async function showIncomePlan() {
   </div>
 
   
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="income-plan-section">
-    <h2 class="text-xl font-bold text-center mb-4">📈 Подсчёт накоплений</h2>
-    <div id="income-plan-list" class="space-y-2 text-sm text-gray-800"></div>
-      <button onclick="hideAll(); showMainMenu()" class="mt-4 bg-gray-300 w-full py-2 rounded">← Назад</button>
-
+  <div class="max-w-full mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="income-plan-section">
+  <h2 class="text-xl font-bold text-center mb-4">📈 Подсчёт накоплений</h2>
+  <div id="income-plan-list" class="overflow-auto"></div>
+  <button onclick="hideAll(); showMainMenu()" class="mt-4 bg-gray-300 w-full py-2 rounded">← Назад</button>
+  </div>
 
   </div>
 

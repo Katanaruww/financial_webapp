@@ -101,7 +101,7 @@
     row.forEach((val, idx) => {
       const td = document.createElement("td");
       td.className = "border px-2 py-1 text-sm";
-      if (idx === row.length - 1) {  // последняя колонка — это дата
+      if (idx === row.length - 1) {
         const d = new Date(val);
         td.textContent = d.toLocaleDateString("ru-RU");
       } else {
@@ -109,6 +109,9 @@
       }
       tr.appendChild(td);
     });
+    table.appendChild(tr);
+  });
+};
     table.appendChild(tr);
   });
 });

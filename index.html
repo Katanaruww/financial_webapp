@@ -7,178 +7,203 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-  <script>
-    let user_id = 1;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script>
+  let user_id = 1;
 
-    function hideAll() {
-      document.querySelectorAll("#main-menu, #add-section, #view-section, #stats-section, #edit-section").forEach(el => el.classList.add("hidden"));
-    }
+  function hideAll() {
+    document.querySelectorAll("#main-menu, #add-section, #view-section, #stats-section, #edit-section").forEach(el => el.classList.add("hidden"));
+  }
 
-    function showAdd() {
-      hideAll();
-      document.getElementById("add-section").classList.remove("hidden");
-    }
+  function showAdd() {
+    hideAll();
+    document.getElementById("add-section").classList.remove("hidden");
+  }
 
-    function showView() {
-      hideAll();
-      document.getElementById("view-section").classList.remove("hidden");
-    }
+  function showView() {
+    hideAll();
+    document.getElementById("view-section").classList.remove("hidden");
+  }
 
-    function showStats() {
-      hideAll();
-      document.getElementById("stats-section").classList.remove("hidden");
-      loadStats();
-    }
+  function showStats() {
+    hideAll();
+    document.getElementById("stats-section").classList.remove("hidden");
+    loadStats();
+  }
 
-    function showEdit() {
-      hideAll();
-      document.getElementById("edit-section").classList.remove("hidden");
-    }
+  function showEdit() {
+    hideAll();
+    document.getElementById("edit-section").classList.remove("hidden");
+  }
 
-    async function loadLatest() {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      const latest = document.getElementById("latest-expenses");
-      latest.innerHTML = "";
-      data.latest_expenses.forEach(([title, amount]) => {
-        const div = document.createElement("div");
-        div.className = "text-sm text-gray-700";
-        div.textContent = `${title} — ${amount}₽`;
-        latest.appendChild(div);
-      });
-    }
+  function showIncomePlan() {
+    hideAll();
+    alert("📈 Пока что здесь будет список накоплений. Скоро сделаю!");
+    // Здесь позже можно загрузить из /api/get_income_plan
+  }
 
-    async function clearAllData() {
-      const confirmed = confirm("Ты точно хочешь удалить все записи?");
-      if (!confirmed) return;
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
-        method: "POST"
-      });
-      const result = await res.json();
-      alert(result.message);
-      loadLatest();
-    }
+  async function loadLatest() {
+    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+    const data = await res.json();
+    const latest = document.getElementById("latest-expenses");
+    latest.innerHTML = "";
+    data.latest_expenses.forEach(([title, amount]) => {
+      const div = document.createElement("div");
+      div.className = "text-sm text-gray-700";
+      div.textContent = `${title} — ${amount}₽`;
+      latest.appendChild(div);
+    });
+  }
 
-    function toggleForm(type) {
-      document.getElementById("expense-form").classList.add("hidden");
-      document.getElementById("income-form").classList.add("hidden");
-      document.getElementById(`${type}-form`).classList.remove("hidden");
-    }
+  async function clearAllData() {
+    const confirmed = confirm("Ты точно хочешь удалить все записи?");
+    if (!confirmed) return;
+    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, { method: "POST" });
+    const result = await res.json();
+    alert(result.message);
+    loadLatest();
+  }
 
-    async function sendFormData(type) {
-      const form = document.getElementById(`${type}-form`);
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      data.user_id = user_id;
+  function toggleForm(type) {
+    document.getElementById("expense-form").classList.add("hidden");
+    document.getElementById("income-form").classList.add("hidden");
+    document.getElementById(`${type}-form`).classList.remove("hidden");
+  }
 
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
+  async function sendFormData(type) {
+    const form = document.getElementById(`${type}-form`);
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+    data.user_id = user_id;
 
-      const result = await res.json();
-      alert(result.message);
-      form.reset();
-      loadLatest();
-    }
+    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/${type}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
 
-    async function loadView(type) {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      const table = document.getElementById("view-table");
-      table.innerHTML = "";
-      const rows = type === "income" ? data.incomes : data.expenses;
+    const result = await res.json();
+    alert(result.message);
+    form.reset();
+    loadLatest();
 
-      if (rows.length === 0) {
-        table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
-        return;
-      }
-
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        row.forEach((val, idx) => {
-          const td = document.createElement("td");
-          td.className = "border px-2 py-1 text-sm";
-          if (idx === row.length - 1) {
-            const d = new Date(val);
-            td.textContent = d.toLocaleDateString("ru-RU");
-          } else {
-            td.textContent = val === 0 ? "" : val;
-          }
-          tr.appendChild(td);
-        });
-        table.appendChild(tr);
-      });
-    }
-
-    async function loadStats() {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      document.getElementById("stat-income").textContent = `${data.total_income}₽`;
-      document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
-      document.getElementById("stat-balance").textContent = `${data.balance}₽`;
-
-      const categories = document.getElementById("stat-categories");
-      categories.innerHTML = "";
-      data.category_totals.forEach(([cat, sum]) => {
-        const li = document.createElement("li");
-        li.textContent = `${cat} — ${sum}₽`;
-        categories.appendChild(li);
-      });
-    }
-
-    function sendEditForm() {
-      const table = document.getElementById("edit-type").value;
-      const id = document.getElementById("edit-id").value;
-      const title = document.getElementById("edit-title").value.trim();
-      const category = document.getElementById("edit-category").value;
-      const amount = document.getElementById("edit-amount").value;
-      const important = document.getElementById("edit-important").value;
-
-      const fields = {};
-      if (title) fields.title = title;
-      if (amount) fields.amount = Number(amount);
-      if (category) fields.category = category;
-      if (important !== "") fields.important = important === "1";
-
-      if (Object.keys(fields).length === 0) {
-        alert("Укажи хотя бы одно поле для изменения");
-        return;
-      }
-
-      fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
+    // 💰 Распределение дохода
+    if (type === "income") {
+      fetch("https://financial-webapp-bot.onrender.com/api/income_plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ table, id, fields })
+        body: JSON.stringify({ income: Number(data.amount), user_id })
       })
       .then(res => res.json())
-      .then(data => alert(data.message || "Готово!"))
-      .catch(() => alert("Ошибка при отправке"));
+      .then(res => {
+        const p = res.plan;
+        alert(
+          `💰 Распределение дохода:\n\n` +
+          `Обязательные расходы: ${p.essentials}₽\n` +
+          `Инвестиции: ${p.investments}₽\n` +
+          `Целевые накопления: ${p.goals}₽\n` +
+          `Подушка безопасности: ${p.safety}₽\n` +
+          `Развлечения: ${p.fun}₽`
+        );
+      });
+    }
+  }
+
+  async function loadView(type) {
+    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+    const data = await res.json();
+    const table = document.getElementById("view-table");
+    table.innerHTML = "";
+    const rows = type === "income" ? data.incomes : data.expenses;
+
+    if (rows.length === 0) {
+      table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
+      return;
     }
 
-    document.addEventListener("DOMContentLoaded", loadLatest);
-  </script>
-  <script>
+    rows.forEach(row => {
+      const tr = document.createElement("tr");
+      row.forEach((val, idx) => {
+        const td = document.createElement("td");
+        td.className = "border px-2 py-1 text-sm";
+        if (idx === row.length - 1) {
+          const d = new Date(val);
+          td.textContent = d.toLocaleDateString("ru-RU");
+        } else {
+          td.textContent = val === 0 ? "" : val;
+        }
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    });
+  }
+
+  async function loadStats() {
+    const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+    const data = await res.json();
+    document.getElementById("stat-income").textContent = `${data.total_income}₽`;
+    document.getElementById("stat-expense").textContent = `${data.total_expense}₽`;
+    document.getElementById("stat-balance").textContent = `${data.balance}₽`;
+
+    const categories = document.getElementById("stat-categories");
+    categories.innerHTML = "";
+    data.category_totals.forEach(([cat, sum]) => {
+      const li = document.createElement("li");
+      li.textContent = `${cat} — ${sum}₽`;
+      categories.appendChild(li);
+    });
+  }
+
+  function sendEditForm() {
+    const table = document.getElementById("edit-type").value;
+    const id = document.getElementById("edit-id").value;
+    const title = document.getElementById("edit-title").value.trim();
+    const category = document.getElementById("edit-category").value;
+    const amount = document.getElementById("edit-amount").value;
+    const important = document.getElementById("edit-important").value;
+
+    const fields = {};
+    if (title) fields.title = title;
+    if (amount) fields.amount = Number(amount);
+    if (category) fields.category = category;
+    if (important !== "") fields.important = important === "1";
+
+    if (Object.keys(fields).length === 0) {
+      alert("Укажи хотя бы одно поле для изменения");
+      return;
+    }
+
+    fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ table, id, fields })
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message || "Готово!"))
+    .catch(() => alert("Ошибка при отправке"));
+  }
+
   async function checkPassword() {
     const input = document.getElementById("auth-password").value;
     const error = document.getElementById("auth-error");
 
-    // 👉 Подставь сюда хеш, который ты сгенерировал для своего пароля
-    const storedHash = "bxHa9yJYC1K54jUQnjPZaaa3oz+6Q4AVwctj95iWtn8=";
+    const storedHash = "bxHa9yJYC1K54jUQnjPZaaa3oz+6Q4AVwctj95iWtn8="; // 🔒 твой SHA-256 хеш
 
     const hashed = CryptoJS.SHA256(input);
     const encoded = CryptoJS.enc.Base64.stringify(hashed);
 
     if (encoded === storedHash) {
       document.getElementById("auth-screen").classList.add("hidden");
+      document.getElementById("main-menu").classList.remove("hidden");
       loadLatest();
     } else {
       error.classList.remove("hidden");
     }
   }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("auth-screen").classList.remove("hidden");
+  });
 </script>
 
 
@@ -193,23 +218,18 @@
   </div>
 </div>
 
-
-  <!-- Main Menu -->
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
+  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
-
     <div class="flex items-center gap-2 mb-2">
       <button onclick="showAdd()" class="flex-grow bg-blue-500 text-white py-2 rounded">➕ Добавить запись</button>
       <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded">🗑</button>
     </div>
-
     <div class="flex items-center gap-2 mb-2">
-      <button onclick="showEdit()" class="bg-yellow-500 text-white px-3 py-2 rounded">✏️</button>
       <button onclick="showView()" class="flex-grow bg-green-500 text-white py-2 rounded">📋 Просмотреть записи</button>
+      <button onclick="showEdit()" class="bg-yellow-500 text-white px-3 py-2 rounded">✏️</button>
     </div>
-
-    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-4">📊 Статистика</button>
-
+    <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded mb-2">📊 Статистика</button>
+    <button onclick="showIncomePlan()" class="bg-indigo-500 text-white w-full py-2 rounded mb-4">📈 Подсчёт накоплений</button>
     <div class="bg-gray-100 rounded p-2">
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
       <div id="latest-expenses" class="space-y-1"></div>

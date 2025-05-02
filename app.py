@@ -175,6 +175,7 @@ def edit_row():
 
 @app.route("/api/income_plan", methods=["POST"])
 def income_plan():
+    
     data = request.json
     income = int(data["income"])
     user_id = int(data.get("user_id", 1))
@@ -189,6 +190,20 @@ def income_plan():
 
     conn = sqlite3.connect("/data/finance.db")
     cur = conn.cursor()
+    cur.execute("""
+            CREATE TABLE IF NOT EXISTS income_plan (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER,
+                income INTEGER,
+                essentials INTEGER,
+                investments INTEGER,
+                goals INTEGER,
+                safety INTEGER,
+                fun INTEGER,
+                date TEXT
+            )
+        """)
+    conn.commit()
     cur.execute('''
         INSERT INTO income_plan (user_id, income, essentials, investments, goals, safety, fun, date)
         VALUES (?, ?, ?, ?, ?, ?, ?, datetime("now"))
@@ -214,25 +229,5 @@ def get_income_plan():
     return jsonify({ "plans": rows })
 
 if __name__ == '__main__':
-    def init_income_plan_table():
-        conn = sqlite3.connect("/data/finance.db")
-        cur = conn.cursor()
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS income_plan (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                income INTEGER,
-                essentials INTEGER,
-                investments INTEGER,
-                goals INTEGER,
-                safety INTEGER,
-                fun INTEGER,
-                date TEXT
-            )
-        """)
-        conn.commit()
-        conn.close()
-
-    init_income_plan_table()
     app.run(debug=True, port=8080)
 

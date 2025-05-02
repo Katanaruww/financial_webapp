@@ -117,6 +117,16 @@ def report():
         "incomes": incomes,
         "expenses": expenses
     })
+
+@app.route('/api/clear', methods=['POST'])
+def clear_data():
+    conn = sqlite3.connect('/data/finance.db')
+    cur = conn.cursor()
+    cur.execute("DELETE FROM expenses WHERE user_id = 1")
+    cur.execute("DELETE FROM incomes WHERE user_id = 1")
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "База очищена"})
 if __name__ == '__main__':
     app.run(debug=True, port=8080)
 

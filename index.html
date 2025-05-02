@@ -12,8 +12,11 @@
   let user_id = 1;
 
   function hideAll() {
-    document.querySelectorAll("#main-menu, #add-section, #view-section, #stats-section, #edit-section").forEach(el => el.classList.add("hidden"));
-  }
+  document.querySelectorAll(
+    "#main-menu, #add-section, #view-section, #stats-section, #edit-section, #income-plan-section"
+  ).forEach(el => el.classList.add("hidden"));
+}
+
 
   function showAdd() {
     hideAll();

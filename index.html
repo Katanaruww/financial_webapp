@@ -151,16 +151,95 @@
   </div>
 
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="edit-section">
-    <h2 class="text-xl font-bold text-center mb-4">Редактировать запись</h2>
-    <select id="edit-table" class="w-full border p-2 rounded mb-2">
-      <option value="expenses">Траты</option>
-      <option value="incomes">Доходы</option>
-    </select>
-    <input id="edit-id" type="number" placeholder="ID записи" class="w-full border p-2 rounded mb-2">
-    <input id="edit-field" type="text" placeholder="Поле (например, title)" class="w-full border p-2 rounded mb-2">
-    <input id="edit-value" type="text" placeholder="Новое значение" class="w-full border p-2 rounded mb-2">
-    <button onclick="sendEditForm()" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить изменения</button>
-    <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
+  <h2 class="text-xl font-bold text-center mb-4">Редактировать запись</h2>
+  <div id="edit-form-container" class="space-y-4">
+    <form onsubmit="event.preventDefault(); sendEditFlexible();">
+      <label class="block text-sm font-semibold">Тип записи:</label>
+      <select id="edit-type" class="w-full border p-2 rounded mb-2">
+        <option value="expenses">Трата</option>
+        <option value="incomes">Доход</option>
+      </select>
+
+      <input id="edit-id-flex" type="number" placeholder="ID записи" class="w-full border p-2 rounded mb-2">
+
+      <div id="edit-expense-fields">
+        <input id="edit-title-exp" type="text" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
+        <select id="edit-category-exp" class="w-full border p-2 rounded mb-2">
+          <option value="">-- Категория --</option>
+          <option value="Дом">Дом</option>
+          <option value="Долги">Долги</option>
+          <option value="Транспорт">Транспорт</option>
+          <option value="Налоги">Налоги</option>
+          <option value="Благотворительность">Благотворительность</option>
+          <option value="Обучение">Обучение</option>
+        </select>
+        <input id="edit-amount-exp" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
+        <label class="flex items-center">
+          <input id="edit-important-exp" type="checkbox" class="mr-2"> Важная трата
+        </label>
+      </div>
+
+      <div id="edit-income-fields">
+        <input id="edit-title-inc" type="text" placeholder="Источник дохода" class="w-full border p-2 rounded mb-2">
+        <input id="edit-amount-inc" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
+      </div>
+
+      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить изменения</button>
+    </form>
+  </div>
+  <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
+</div>
+
+<script>
+  function sendEditFlexible() {
+    const type = document.getElementById("edit-type").value;
+    const id = document.getElementById("edit-id-flex").value;
+    const fields = {};
+
+    if (type === "expenses") {
+      const title = document.getElementById("edit-title-exp").value;
+      const category = document.getElementById("edit-category-exp").value;
+      const amount = document.getElementById("edit-amount-exp").value;
+      const important = document.getElementById("edit-important-exp").checked;
+
+      if (title) fields.title = title;
+      if (category) fields.category = category;
+      if (amount) fields.amount = amount;
+      if (document.getElementById("edit-important-exp").indeterminate === false) {
+        fields.important = important;
+      }
+    } else {
+      const title = document.getElementById("edit-title-inc").value;
+      const amount = document.getElementById("edit-amount-inc").value;
+      if (title) fields.title = title;
+      if (amount) fields.amount = amount;
+    }
+
+    if (!id || Object.keys(fields).length === 0) {
+      alert("Укажи ID и хотя бы одно поле для изменения");
+      return;
+    }
+
+    fetch(`https://financial-webapp-bot.onrender.com/api/edit_row`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ table: type, id: id, fields })
+    })
+      .then(res => res.json())
+      .then(data => alert(data.message))
+      .catch(err => alert("Ошибка: " + err));
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleEditUI = () => {
+      const type = document.getElementById("edit-type").value;
+      document.getElementById("edit-expense-fields").style.display = type === "expenses" ? "block" : "none";
+      document.getElementById("edit-income-fields").style.display = type === "incomes" ? "block" : "none";
+    };
+    document.getElementById("edit-type").addEventListener("change", toggleEditUI);
+    toggleEditUI();
+  });
+</script>
   </div>
 
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="add-section">

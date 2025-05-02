@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Финансовый учёт</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
   <script>
     let user_id = 1;
 
@@ -160,18 +162,25 @@
     document.addEventListener("DOMContentLoaded", loadLatest);
   </script>
   <script>
-  function checkPassword() {
+  async function checkPassword() {
     const input = document.getElementById("auth-password").value;
     const error = document.getElementById("auth-error");
 
-    if (input === "1234") {  // 💡 Замените "1234" на свой пароль
+    // 👉 Подставь сюда хеш, который ты сгенерировал для своего пароля
+    const storedHash = "bxHa9yJYC1K54jUQnjPZaaa3oz+6Q4AVwctj95iWtn8=";
+
+    const hashed = CryptoJS.SHA256(input);
+    const encoded = CryptoJS.enc.Base64.stringify(hashed);
+
+    if (encoded === storedHash) {
       document.getElementById("auth-screen").classList.add("hidden");
-      loadLatest();  // Запуск начального контента
+      loadLatest();
     } else {
       error.classList.remove("hidden");
     }
   }
-  </script>
+</script>
+
 
 </head>
 <body class="bg-gray-100 p-4">
@@ -183,6 +192,7 @@
     <p id="auth-error" class="text-red-500 text-sm mt-2 hidden">⛔ Неверный пароль. Доступ закрыт.</p>
   </div>
 </div>
+
 
   <!-- Main Menu -->
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">

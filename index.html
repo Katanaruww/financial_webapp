@@ -96,6 +96,9 @@
     return;
   }
 
+  
+}
+
   rows.forEach(row => {
     const tr = document.createElement("tr");
     row.forEach((val, idx) => {
@@ -109,7 +112,7 @@
       }
       tr.appendChild(td);
     });
-    table.appendChild(tr);
+    
   });
 }
 
@@ -168,7 +171,9 @@
       alert(result.message);
     }
 
-    window.onload = loadLatest;
+    window.addEventListener("DOMContentLoaded", () => {
+  loadLatest();
+});
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>

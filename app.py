@@ -130,17 +130,26 @@ def clear_data():
 
 @app.route('/api/debug', methods=['GET'])
 def debug_data():
-    conn = sqlite3.connect("/data/finance.db")
+    conn = sqlite3.connect("/data/finance.db")  # или './finance.db' для локального
+    conn.row_factory = sqlite3.Row  # Позволяет получить названия колонок
     cur = conn.cursor()
+
     cur.execute("SELECT * FROM expenses")
-    expenses = cur.fetchall()
+    expenses = [dict(row) for row in cur.fetchall()]
+
     cur.execute("SELECT * FROM incomes")
-    incomes = cur.fetchall()
+    incomes = [dict(row) for row in cur.fetchall()]
+
     conn.close()
     return jsonify({
         "expenses": expenses,
-        "incomes": incomes
+        "incomes": incomes,
+        "count": {
+            "expenses": len(expenses),
+            "incomes": len(incomes)
+        }
     })
+
 
 @app.route('/api/edit_row', methods=['POST'])
 def edit_row():

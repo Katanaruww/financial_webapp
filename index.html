@@ -159,8 +159,30 @@
 
     document.addEventListener("DOMContentLoaded", loadLatest);
   </script>
+  <script>
+  function checkPassword() {
+    const input = document.getElementById("auth-password").value;
+    const error = document.getElementById("auth-error");
+
+    if (input === "1234") {  // 💡 Замените "1234" на свой пароль
+      document.getElementById("auth-screen").classList.add("hidden");
+      loadLatest();  // Запуск начального контента
+    } else {
+      error.classList.remove("hidden");
+    }
+  }
+  </script>
+
 </head>
 <body class="bg-gray-100 p-4">
+<div id="auth-screen" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+  <div class="bg-white shadow-xl rounded-xl p-6 max-w-sm w-full text-center">
+    <h2 class="text-xl font-bold mb-4">Введите пароль</h2>
+    <input type="password" id="auth-password" placeholder="Пароль" class="w-full border p-2 rounded mb-4">
+    <button onclick="checkPassword()" class="bg-blue-500 text-white w-full py-2 rounded">Войти</button>
+    <p id="auth-error" class="text-red-500 text-sm mt-2 hidden">⛔ Неверный пароль. Доступ закрыт.</p>
+  </div>
+</div>
 
   <!-- Main Menu -->
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">

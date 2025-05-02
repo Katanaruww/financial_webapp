@@ -85,20 +85,33 @@
     }
 
     async function loadView(type) {
-      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
-      const data = await res.json();
-      const table = document.getElementById("view-table");
-      table.innerHTML = "";
-      const rows = type === "income" ? data.incomes : data.expenses;
+  const res = await fetch(`https://financial-webapp-bot.onrender.com/api/report`);
+  const data = await res.json();
+  const table = document.getElementById("view-table");
+  table.innerHTML = "";
+  const rows = type === "income" ? data.incomes : data.expenses;
 
-      rows.forEach(row => {
-        const tr = document.createElement("tr");
-        row.forEach(val => {
-          const td = document.createElement("td");
-          td.className = "border px-2 py-1 text-sm";
-          td.textContent = val;
-          tr.appendChild(td);
-        });
+  if (rows.length === 0) {
+    table.innerHTML = '<tr><td colspan="5" class="text-center text-gray-500">Нет записей</td></tr>';
+    return;
+  }
+
+  rows.forEach(row => {
+    const tr = document.createElement("tr");
+    row.forEach((val, idx) => {
+      const td = document.createElement("td");
+      td.className = "border px-2 py-1 text-sm";
+      if (idx === row.length - 1) {  // последняя колонка — это дата
+        const d = new Date(val);
+        td.textContent = d.toLocaleDateString("ru-RU");
+      } else {
+        td.textContent = val === 0 ? "" : val;
+      }
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+});
         table.appendChild(tr);
       });
     }
@@ -272,7 +285,7 @@
     <button onclick="hideAll(); document.getElementById('main-menu').classList.remove('hidden')" class="mt-4 bg-gray-300 px-4 py-2 rounded w-full">← Назад</button>
   </div>
 
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="view-section">
+  <div class="w-full max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="view-section">
     <h2 class="text-xl font-bold text-center mb-4">Просмотр записей</h2>
     <div class="flex justify-between mb-4">
       <button onclick="loadView('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Траты</button>

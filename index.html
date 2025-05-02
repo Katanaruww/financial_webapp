@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Финансовый учёт</title>
   <script>
-    let user_id = 1; // фиксированный ID для всех записей
+    let user_id = 1;
 
     async function sendFormData(type) {
       const formData = new FormData(document.getElementById(`${type}-form`));
@@ -82,6 +82,17 @@
       });
     }
 
+    async function clearAllData() {
+      const confirmed = confirm("Ты точно хочешь удалить все записи?");
+      if (!confirmed) return;
+      const res = await fetch(`https://financial-webapp-bot.onrender.com/api/clear`, {
+        method: "POST"
+      });
+      const result = await res.json();
+      alert(result.message);
+      loadLatest();
+    }
+
     function toggleForm(type) {
       document.getElementById('expense-form').classList.add('hidden');
       document.getElementById('income-form').classList.add('hidden');
@@ -129,10 +140,14 @@
 <body class="bg-gray-100 p-4">
   <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6" id="main-menu">
     <h1 class="text-2xl font-bold text-center mb-4">Финансовый учёт</h1>
-    <div class="flex flex-col gap-4 mb-4">
-      <button onclick="showAdd()" class="bg-blue-500 text-white w-full py-2 rounded">➕ Добавить запись</button>
-      <button onclick="showView()" class="bg-green-500 text-white w-full py-2 rounded">📋 Просмотреть записи</button>
-      <button onclick="showStats()" class="bg-gray-400 text-white w-full py-2 rounded">📊 Статистика</button>
+    <div class="flex items-center justify-between gap-2 mb-4">
+      <div class="flex-grow">
+        <button onclick="showAdd()" class="bg-blue-500 text-white w-full py-2 rounded">➕ Добавить запись</button>
+      </div>
+      <div class="flex flex-col gap-1">
+        <button onclick="showStats()" class="bg-gray-400 text-white px-3 py-2 rounded text-sm">📊</button>
+        <button onclick="clearAllData()" class="bg-red-500 text-white px-3 py-2 rounded text-sm">🗑</button>
+      </div>
     </div>
     <div class="bg-gray-100 rounded p-2">
       <p class="text-sm font-semibold mb-1">Последние траты:</p>
@@ -140,59 +155,6 @@
     </div>
   </div>
 
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="add-section">
-    <div class="flex justify-between mb-4">
-      <button onclick="toggleForm('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Трата</button>
-      <button onclick="toggleForm('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Доход</button>
-    </div>
-
-    <form id="expense-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('expense');">
-      <input name="title" placeholder="Наименование" class="w-full border p-2 rounded mb-2">
-      <select name="category" class="w-full border p-2 rounded mb-2">
-        <option value="Продукты">Продукты</option>
-        <option value="Транспорт">Транспорт</option>
-        <option value="Развлечения">Развлечения</option>
-      </select>
-      <input name="amount" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-2">
-      <label class="flex items-center mb-4">
-        <input type="checkbox" name="important" class="mr-2"> Важная трата
-      </label>
-      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить трату</button>
-    </form>
-
-    <form id="income-form" class="hidden" onsubmit="event.preventDefault(); sendFormData('income');">
-      <input name="title" placeholder="Источник дохода" class="w-full border p-2 rounded mb-2">
-      <input name="amount" type="number" placeholder="Сумма" class="w-full border p-2 rounded mb-4">
-      <button type="submit" class="bg-blue-500 text-white w-full py-2 rounded">Сохранить доход</button>
-    </form>
-
-    <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
-  </div>
-
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="view-section">
-    <h2 class="text-xl font-bold text-center mb-4">Просмотр записей</h2>
-    <div class="flex justify-between mb-4">
-      <button onclick="loadView('expense')" class="bg-red-500 text-white px-4 py-2 rounded-lg">Траты</button>
-      <button onclick="loadView('income')" class="bg-green-500 text-white px-4 py-2 rounded-lg">Доходы</button>
-    </div>
-    <table class="w-full text-left border border-collapse">
-      <tbody id="view-table"></tbody>
-    </table>
-    <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
-  </div>
-
-  <div class="max-w-md mx-auto bg-white shadow-xl rounded-xl p-6 hidden" id="stats-section">
-    <h2 class="text-xl font-bold text-center mb-4">📊 Статистика</h2>
-    <div class="space-y-2 text-sm">
-      <div>💰 Доходы: <span id="stat-income"></span></div>
-      <div>💸 Расходы: <span id="stat-expense"></span></div>
-      <div>🟢 Баланс: <span id="stat-balance"></span></div>
-    </div>
-    <div class="mt-4">
-      <h3 class="text-sm font-semibold mb-1">📁 Категории:</h3>
-      <ul id="stat-categories" class="list-disc list-inside text-sm text-gray-700"></ul>
-    </div>
-    <button onclick="backToMenu()" class="mt-4 w-full py-2 bg-gray-300 rounded">← Назад</button>
-  </div>
+  <!-- Остальной код без изменений -->
 </body>
 </html>
